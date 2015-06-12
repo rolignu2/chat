@@ -39,20 +39,25 @@
 <core-scaffold>
 
   	<div tool layout horizontal flex>
-  		<div flex>Identificate </div>
+  		<div flex>Identificate {{access}}</div>
   		<core-icon icon="account-circle"></core-icon><span></span>
   	</div>
 
   	<section layout vertical fit id="chat">
             
             <br><br>
+            
+            <div  class="dialog" layout horizontal>
+                <p align="center"><b>{{message}}</b></p>
+	    </div>
 		
-		<div class="shim"></div>
+            <div class="shim">
+                
+            </div>
                
-
             <div class="send-message" layout horizontal>
-	    	<paper-input flex label="tu codigo secreto" id="input" value="" on-keyup=""></paper-input>
-	    	<paper-fab icon="send" id="sendButton" on-tap=""></paper-fab>
+	    	<paper-input flex label="tu codigo secreto" id="inputnode" value="{{input}}" on-keyup=""></paper-input>
+	    	<paper-fab icon="send" id="sendButton" on-tap="{{checkcode}}"></paper-fab>
 	    </div>
   	</section>
 </core-scaffold>
@@ -64,8 +69,47 @@
         <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/task.js"></script>
         <script type="text/javascript">
             app.initialize();
+            
+            var template = document.querySelector('template[is=auto-binding]');
+            
+            template.checkcode = function(e) {
+                
+                 var code = function(){
+                     
+                     var input = template.input;
+                     
+                     var task = new jtask();
+                     task.url = "http://webservices.lieison.com/index.php/Chat/getkey/" + input ;
+                     task.dataType = "html";
+                     task.success_callback(function(call){
+                          var response = $.trim(call);
+                          if(response == 0){
+                                template.access = " (DENEGADO) ...";
+                                template.message = "NECESITAS PERMISO PARA ENTRAR";
+                          }
+                          else{
+                              
+                            //  window.localStorage.setItem()
+                             window.location.href = "chat.html";
+                              
+                          }
+                          console.log("area del codigo");
+                     });
+                     task.do_task();
+                     
+                 };
+                 
+                 code();
+                  
+            };
+            
+            $("#sendButton").click(function(){
+                 
+            });
+            
         </script>
     </body>
 </html>
