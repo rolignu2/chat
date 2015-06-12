@@ -61,20 +61,25 @@
   	</core-header-panel>
 
   	<div tool layout horizontal flex>
-  		<div flex>Kitteh Anonymous</div>
+  		<div flex>{{user}}</div>
   		<core-icon icon="account-circle"></core-icon><span>{{occupancy}}</span>
   	</div>
 
   	<section layout vertical fit id="chat">
 		<div flex class="chat-list">
 			<template repeat="{{message in messageList}}">
-				<x-chat-list color="{{message.color}}" avatar="{{message.avatar}}" username="{{message.uuid}}" text="{{message.text}}"  status="{{message.status}}" timestamp="{{message.timestamp}}"></x-chat-list>
+				<x-chat-list color="blue" 
+                                             avatar="img/{{message.avatar}}" 
+                                             username="{{message.name}}" 
+                                             text="{{message.message}}"  
+                                             status="activate" 
+                                             timestamp="{{message.date}}"></x-chat-list>
 			</template>
 		</div>
 		<div class="shim"></div>
 
 		<div class="send-message" layout horizontal>
-	    	<paper-input flex label="Type message..." id="input" value="{{input}}" on-keyup="{{checkKey}}"></paper-input>
+	    	<paper-input flex label="Type message..." id="input" value="{{input}}"  on-keyup="{{checkKey}}"></paper-input>
 	    	<paper-fab icon="send" id="sendButton" on-tap="{{sendMyMessage}}"></paper-fab>
 	    </div>
   	</section>
@@ -87,9 +92,81 @@
         <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
-        <script src="js/app.js"></script>
+        <script type="text/javascript" src="js/task.js"></script>
+        <!--<script src="js/app.js"></script>-->
         <script type="text/javascript">
             app.initialize();
+            
+            console.log("inicio del chat ");
+            var id = window.localStorage.getItem("id");
+            console.log("id: " + id);
+            
+            var template = document.querySelector('template[is=auto-binding]');
+            
+            template.uuid = id;
+            
+             var randomColor = function() {
+                    var colors = ['navy', 'slate', 'olive', 'moss', 'chocolate', 'buttercup', 'maroon', 'cerise', 'plum', 'orchid'];
+                    return colors[(Math.random() * colors.length) >>> 0];
+             };
+             
+             template.color = randomColor();
+             
+             var task = new jtask();
+             //task.url = "http://webservices.lieison.com/index.php/Chat/getuser/";
+             task.url = "http://webservices.lieison.com/index.php/Chat/getuser/" + id;
+             task.dataType = "html";
+             task.success_callback(function(call){
+                 console.log("informacion del usuario set ...");
+                 var data = JSON.parse(call);
+                 template.user = data.name;
+                 template.avatar = "img/" + data.avatar;
+            
+             });
+             task.do_task();
+             
+             var messages = function(){
+                     var task = new jtask();
+                    task.url = "http://webservices.lieison.com/index.php/Chat/" ;
+                    task.dataType = "html";
+                    task.success_callback(function(call){
+                        console.log("mensajes ...");
+                        var msj = JSON.parse(call);
+                        template.messageList = msj;
+                    });
+                task.do_task();
+             };
+             
+             template.sendMyMessage= function(e) {
+                  send();
+             };
+             
+             template.checkKey = function (e){
+                  if(e.keyCode === 13 || e.charCode === 13) {
+                   send();
+                }
+             }
+             
+             var send = function(){
+                  var id = window.localStorage.getItem("id");
+                  var input = template.input;
+                  task.url = "http://webservices.lieison.com/index.php/Chat/add/" + id + "/" + input ;
+                  task.dataType = "html";
+                  task.success_callback(function(call){
+                        console.log("enviado ...");
+                        template.input = null;
+                        
+                        var chatDiv = document.querySelector('.chat-list');
+                        chatDiv.scrollTop = chatDiv.scrollHeight;
+                    });
+                task.do_task();
+             };
+             
+             setInterval(messages , 2000);
+             
+             
+             
+            
         </script>
     </body>
 </html>

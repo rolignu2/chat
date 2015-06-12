@@ -73,6 +73,7 @@
     };
 
     template.displayChatList = function(list) {
+        //console.log(list);
         template.messageList = list;
         // scroll to bottom when all list items are displayed
         template.async(showNewest);
