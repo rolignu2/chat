@@ -81,12 +81,17 @@
                      
                      var input = template.input;
                      
+                     if(input === ""){
+                         template.message = "Codigo vacio !!!";
+                         return;
+                     }
+                     
                      var task = new jtask();
                      task.url = "http://webservices.lieison.com/index.php/Chat/getkey/" + input ;
                      task.dataType = "html";
                      task.success_callback(function(call){
                           var response = $.trim(call);
-                          if(response == 0){
+                          if(response <= 0){
                                 template.access = " (DENEGADO) ...";
                                 template.message = "NECESITAS PERMISO PARA ENTRAR";
                           }
